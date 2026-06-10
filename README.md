@@ -42,11 +42,7 @@ The system manages:
 4. Insert sample data.
 5. Run queries and views.
 
-## Student Information
 
-Name: YOUR NAME
-
-Roll Number: YOUR ROLL NUMBER
 
 ## Course
 
