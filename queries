@@ -1,0 +1,144 @@
+/* =========================================
+TRIGGER
+
+CREATE TRIGGER trg_payment_audit
+ON Payment
+AFTER INSERT
+AS
+BEGIN
+INSERT INTO AuditLog
+(
+StudentID,
+ActionType
+)
+SELECT
+StudentID,
+'Payment Added'
+FROM inserted;
+END;
+
+
+VIEW 1
+CREATE VIEW StudentCourseView
+AS
+SELECT
+s.StudentID,
+s.Name,
+c.CourseName,
+sec.Semester,
+sec.[Year]
+FROM Student s
+JOIN Enrollment e
+ON s.StudentID = e.StudentID
+JOIN Section sec
+ON e.SectionID = sec.SectionID
+JOIN Course c
+ON sec.CourseID = c.CourseID;
+
+
+VIEW 2
+CREATE VIEW DepartmentInstructorView
+AS
+SELECT
+d.DepartmentName,
+i.Name,
+i.Email
+FROM Department d
+JOIN Instructor i
+ON d.DepartmentID = i.DepartmentID;
+
+
+JOIN QUERY 1
+SELECT
+s.Name AS StudentName,
+c.CourseName,
+i.Name AS InstructorName
+FROM Student s
+JOIN Enrollment e
+ON s.StudentID = e.StudentID
+JOIN Section sec
+ON e.SectionID = sec.SectionID
+JOIN Course c
+ON sec.CourseID = c.CourseID
+JOIN Instructor i
+ON sec.InstructorID = i.InstructorID;
+
+
+JOIN QUERY 2
+SELECT
+d.DepartmentName,
+c.CourseName,
+i.Name AS InstructorName
+FROM Department d
+JOIN Course c
+ON d.DepartmentID = c.DepartmentID
+JOIN Section sec
+ON c.CourseID = sec.CourseID
+JOIN Instructor i
+ON sec.InstructorID = i.InstructorID;
+
+
+AGGREGATION QUERY 1
+SELECT
+Status,
+COUNT(*) AS TotalPayments,
+SUM(Amount) AS TotalRevenue
+FROM Payment
+GROUP BY Status;
+
+
+AGGREGATION QUERY 2
+SELECT
+StudentID,
+AVG(Amount) AS AverageFee
+FROM Payment
+GROUP BY StudentID
+HAVING AVG(Amount) > 50000;
+
+
+NESTED SUBQUERY 1 (IN)
+SELECT Name
+FROM Student
+WHERE StudentID IN
+(
+SELECT StudentID
+FROM Payment
+WHERE Amount > 50000
+);
+
+
+NESTED SUBQUERY 2 (EXISTS)
+SELECT i.Name
+FROM Instructor i
+WHERE EXISTS
+(
+SELECT *
+FROM Section s
+WHERE s.InstructorID = i.InstructorID
+);
+
+
+VIEW EXECUTION
+SELECT * FROM StudentCourseView;
+
+SELECT * FROM DepartmentInstructorView;
+
+
+TEST TRIGGER
+
+
+INSERT INTO Payment
+VALUES
+(
+21,
+101,
+45000,
+'2026-06-01',
+'Paid'
+);
+
+
+CHECK TRIGGER RESULT
+
+
+SELECT * FROM AuditLog;
